@@ -1,11 +1,12 @@
 use cursive::views::Dialog;
-use cursive::Cursive;
 
 fn main() {
     let mut siv = cursive::default();
 
+    siv.set_window_title("Goindol Fund Client");
+
     siv.add_layer(
-        Dialog::text("고인돌 펀드~")
+        Dialog::text("Unimplemented")
             .title("Information")
             .button("OK", |s| s.quit()),
     );
