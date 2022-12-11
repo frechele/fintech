@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+	"gofund",
+	"gofund_srv",
+	"finance"
+]
+
