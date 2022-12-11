@@ -3,29 +3,16 @@ use std::fs;
 use std::process::exit;
 use toml;
 
-use cursive::views::Dialog;
+mod ui;
 
 fn main() {
     let config = load_configuration();
 
-    let mut siv = cursive::default();
-
-    siv.set_window_title("Goindol Fund Client");
-
-    siv.add_layer(
-        Dialog::text(format!(
-            "Server ip: {}\nServer port: {}",
-            &config.ip, &config.port
-        ))
-        .title("Information")
-        .button("OK", |s| s.quit()),
-    );
-
-    siv.run();
+    ui::create_ui(config);
 }
 
 #[derive(Deserialize)]
-struct Config {
+pub struct Config {
     ip: String,
     port: u16,
 }
