@@ -1,10 +1,10 @@
 import yfinance as yf
 
-from analyzer.database import FinanceDatabase
+from analyzer.database import OHLCDatabase
 
 
 def update_with_yfinance():
-    db = FinanceDatabase()
+    db = OHLCDatabase()
 
     for tablename, ticker in db.INDEX_TICKER_TABLE.items():
         print(f"Updating {tablename}...", end=" ")

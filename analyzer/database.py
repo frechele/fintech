@@ -6,7 +6,8 @@ from typing import Union
 from analyzer.config import DB_CONFIG
 
 
-class FinanceDatabase:
+
+class OHLCDatabase:
     def __init__(self):
         self.conn = pg.connect(**DB_CONFIG)
 
