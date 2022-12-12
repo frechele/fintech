@@ -1,6 +1,7 @@
 import psycopg2 as pg
 import pandas as pd
-import time
+import datetime
+from typing import Union
 
 from analyzer.config import DB_CONFIG
 
@@ -39,6 +40,42 @@ class FinanceDatabase:
 
     def get_ticker(self, index_name: str):
         return self.INDEX_TICKER_TABLE[index_name]
+
+    def get_last_update_date(self, tablename: str):
+        with self.conn.cursor() as curs:
+            sql = f"""
+            SELECT MAX(date) FROM "{tablename}"
+            """
+            curs.execute(sql)
+            return curs.fetchone()[0]
+
+    def get_values(self, tablename: str, start_date: Union[None, datetime.date] = None, end_date: Union[None, datetime.date] = None) -> pd.DataFrame:
+        if start_date is None and end_date is None:
+            sql = f"""
+            SELECT * FROM "{tablename}"
+            """
+        elif start_date is None:
+            end_date = end_date.strftime("%Y-%m-%d")
+            sql = f"""
+            SELECT * FROM "{tablename}"
+            WHERE date <= '{end_date}'
+            """
+        elif end_date is None:
+            start_date = start_date.strftime("%Y-%m-%d")
+            sql = f"""
+            SELECT * FROM "{tablename}"
+            WHERE date >= '{start_date}'
+            """
+        else:
+            start_date = start_date.strftime("%Y-%m-%d")
+            end_date = end_date.strftime("%Y-%m-%d")
+            sql = f"""
+            SELECT * FROM "{tablename}"
+            WHERE date BETWEEN '{start_date}' AND '{end_date}'
+            """
+
+        df = pd.read_sql(sql, self.conn)
+        return df.set_index("date")
 
     def update_table(self, tablename: str, df: pd.DataFrame):
         with self.conn.cursor() as curs:
