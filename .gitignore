@@ -10,7 +10,7 @@ Cargo.lock
 **/*.rs.bk
 
 # For security
-analyzer/config.py
+config.toml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

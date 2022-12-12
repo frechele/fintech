@@ -8,12 +8,10 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-from analyzer.config import DB_CONFIG
-
 
 class OHLCDatabase:
-    def __init__(self):
-        self.conn = pg.connect(**DB_CONFIG)
+    def __init__(self, config):
+        self.conn = pg.connect(**config["database"])
 
         self.INDEX_TICKER_TABLE = {
             "SNP500": "^GSPC",
@@ -131,8 +129,8 @@ class TimeTerm(Enum):
 
 
 class AnalysisDatabase:
-    def __init__(self):
-        self.conn = pg.connect(**DB_CONFIG)
+    def __init__(self, config):
+        self.conn = pg.connect(**config["database"])
 
         self._create_corr_table()
         self.conn.commit()

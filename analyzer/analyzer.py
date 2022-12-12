@@ -1,7 +1,8 @@
 import pandas as pd
 import datetime
 
-from analyzer.database import OHLCDatabase, AnalysisDatabase, TimeTerm
+from analyzer.config import load_configuration
+from analyzer.database import OHLCDatabase
 
 
 def get_min_latest_date(db: OHLCDatabase) -> datetime.date:
@@ -27,7 +28,7 @@ def merge_all_tables(db: OHLCDatabase, latest_time: datetime.date, traiding_days
 
 
 def calc_correlation() -> pd.DataFrame:
-    db = OHLCDatabase()
+    db = OHLCDatabase(load_configuration())
 
     latest_time = get_min_latest_date(db)
 
@@ -45,3 +46,12 @@ def calc_correlation() -> pd.DataFrame:
 
     df = pd.concat([corr_short, corr_mid, corr_long], axis=1, keys=["short", "mid", "long"])
     return df
+
+
+if __name__ == "__main__":
+    from analyzer.database import AnalysisDatabase, TimeTerm
+
+    db = AnalysisDatabase(load_configuration())
+    print("SHORT", db.get_correlation("NASDAQ", TimeTerm.SHORT))
+    print("MID", db.get_correlation("NASDAQ", TimeTerm.MID))
+    print("LONG", db.get_correlation("NASDAQ", TimeTerm.LONG))

@@ -1,10 +1,11 @@
 import yfinance as yf
 
+from analyzer.config import load_configuration
 from analyzer.database import OHLCDatabase
 
 
 def update_with_yfinance():
-    db = OHLCDatabase()
+    db = OHLCDatabase(load_configuration())
 
     for tablename, ticker in db.INDEX_TICKER_TABLE.items():
         print(f"Updating {tablename}...", end=" ")
