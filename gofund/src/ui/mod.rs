@@ -1,5 +1,6 @@
 use cursive::views::Dialog;
 use cursive::{menu, Cursive};
+use cursive::event::Key;
 
 use crate::Config;
 
@@ -29,4 +30,5 @@ fn build_menubar(siv: &mut Cursive) {
         );
 
     siv.set_autohide_menu(false);
+    siv.add_global_callback(Key::Esc, |s| { s.select_menubar(); });
 }
