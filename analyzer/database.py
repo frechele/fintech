@@ -2,9 +2,13 @@ import psycopg2 as pg
 import pandas as pd
 import datetime
 from typing import Union
+from enum import Enum
+
+import warnings
+
+warnings.filterwarnings('ignore')
 
 from analyzer.config import DB_CONFIG
-
 
 
 class OHLCDatabase:
@@ -50,7 +54,7 @@ class OHLCDatabase:
             curs.execute(sql)
             return curs.fetchone()[0]
 
-    def get_values(self, tablename: str, start_date: Union[None, datetime.date] = None, end_date: Union[None, datetime.date] = None) -> pd.DataFrame:
+    def get_values(self, tablename: str, start_date: Union[None, datetime.date] = None, end_date: Union[None, datetime.date] = None, limits: Union[None, int] = None) -> pd.DataFrame:
         if start_date is None and end_date is None:
             sql = f"""
             SELECT * FROM "{tablename}"
@@ -75,7 +79,17 @@ class OHLCDatabase:
             WHERE date BETWEEN '{start_date}' AND '{end_date}'
             """
 
+        if limits is not None:
+            sql += f"""
+            ORDER BY date DESC
+            LIMIT {limits}
+            """
+
         df = pd.read_sql(sql, self.conn)
+
+        if limits is not None:
+            df = df.sort_values("date")
+
         return df.set_index("date")
 
     def update_table(self, tablename: str, df: pd.DataFrame):
@@ -106,5 +120,63 @@ class OHLCDatabase:
                 close FLOAT,
                 PRIMARY KEY (date)
             ) 
+            """
+            curs.execute(sql)
+
+
+class TimeTerm(Enum):
+    SHORT = 0
+    MID = 1
+    LONG = 2
+
+
+class AnalysisDatabase:
+    def __init__(self):
+        self.conn = pg.connect(**DB_CONFIG)
+
+        self._create_corr_table()
+        self.conn.commit()
+
+    def __del__(self):
+        self.conn.close()
+
+    def update_correlation(self, df: pd.DataFrame):
+        with self.conn.cursor() as curs:
+            sql = """
+            DELETE FROM "correlation"
+            """
+            curs.execute(sql)
+
+            for row in df.iterrows():
+                code = row[0]
+                for term, corr in row[1].items():
+                    term = TimeTerm[term.upper()].value
+
+                    sql = f"""
+                    INSERT INTO "correlation" (code, term, corr)
+                    VALUES ('{code}', {term}, {corr:.5f})
+                    """
+                    curs.execute(sql)
+
+        self.conn.commit()
+
+    def get_correlation(self, code: str, term: TimeTerm) -> float:
+        with self.conn.cursor() as curs:
+            sql = f"""
+            SELECT corr FROM "correlation"
+            WHERE code = '{code}' AND term = {term.value}
+            """
+            curs.execute(sql)
+            return curs.fetchone()[0]
+
+    def _create_corr_table(self):
+        with self.conn.cursor() as curs:
+            sql = """
+            CREATE TABLE IF NOT EXISTS "correlation" (
+                code VARCHAR(30),
+                term INT,
+                corr FLOAT,
+                PRIMARY KEY (code, term)
+            )
             """
             curs.execute(sql)
