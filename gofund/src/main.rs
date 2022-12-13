@@ -18,21 +18,15 @@ pub struct Config {
 }
 
 fn load_configuration() -> Config {
-    let contents = match fs::read_to_string("config.toml") {
-        Ok(c) => c,
-        Err(_) => {
-            eprintln!("Could not read config file");
-            exit(-1);
-        }
-    };
+    let contents = fs::read_to_string("config.toml").unwrap_or_else(|err| {
+        eprintln!("Error reading configuration file: {}", err);
+        exit(1);
+    });
 
-    let data: Config = match toml::from_str(&contents) {
-        Ok(d) => d,
-        Err(_) => {
-            eprintln!("Unable to load config file");
-            exit(-1);
-        }
-    };
+    let data: Config = toml::from_str(&contents).unwrap_or_else(|err| {
+        eprintln!("Error parsing configuration file: {}", err);
+        exit(1);
+    });
 
     data
 }
