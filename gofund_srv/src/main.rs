@@ -1,21 +1,28 @@
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
-mod database;
+use rocket::serde::json::Json;
+
 mod config;
+mod database;
 
 #[get("/")]
 async fn index() -> &'static str {
-    let mut db = database::connect_db().await;
-
-    db.execute().await;
-
     "Hell World!"
+}
+
+#[get("/corr", format = "application/json")]
+async fn corr() -> Json<Vec<database::Correlation>> {
+    let mut db = database::connect_db().await;
+    let corr = db.get_correlations().await;
+
+    Json(corr)
 }
 
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
     let _rocket = rocket::build()
-        .mount("/", routes![index])
+        .mount("/", routes![index, corr])
         .launch()
         .await?;
 
