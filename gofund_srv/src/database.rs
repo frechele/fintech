@@ -1,5 +1,6 @@
 use tokio_postgres::{Client, NoTls};
 
+use std::collections::HashMap;
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 use crate::config::{load_configuration, Config};
@@ -73,6 +74,23 @@ impl Database {
                 term: term,
                 corr,
             });
+        }
+
+        result
+    }
+
+    pub async fn get_value(&mut self, value_type: &str, code: &str, end_date: &str, limit: i32) -> HashMap<String, f64> {
+        let mut result: HashMap<String, f64> = HashMap::new();
+
+        let query = format!(
+            "SELECT date::TEXT, {} FROM \"{}\" WHERE date <= '{}' ORDER BY date DESC LIMIT {}",
+            value_type, code, end_date, limit
+        );
+
+        for row in self.client.query(&query, &[]).await.unwrap() {
+            let date: String = row.get(0);
+            let close: f64 = row.get(1);
+            result.insert(date, close);
         }
 
         result
