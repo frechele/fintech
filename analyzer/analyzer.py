@@ -46,12 +46,3 @@ def calc_correlation() -> pd.DataFrame:
 
     df = pd.concat([corr_short, corr_mid, corr_long], axis=1, keys=["short", "mid", "long"])
     return df
-
-
-if __name__ == "__main__":
-    from analyzer.database import AnalysisDatabase, TimeTerm
-
-    db = AnalysisDatabase(load_configuration())
-    print("SHORT", db.get_correlation("NASDAQ", TimeTerm.SHORT))
-    print("MID", db.get_correlation("NASDAQ", TimeTerm.MID))
-    print("LONG", db.get_correlation("NASDAQ", TimeTerm.LONG))
