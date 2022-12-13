@@ -1,7 +1,14 @@
 #[macro_use] extern crate rocket;
 
+mod database;
+mod config;
+
 #[get("/")]
-fn index() -> &'static str {
+async fn index() -> &'static str {
+    let mut db = database::connect_db().await;
+
+    db.execute().await;
+
     "Hell World!"
 }
 
