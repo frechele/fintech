@@ -21,6 +21,14 @@ async fn corr() -> Json<Vec<database::Correlation>> {
     Json(corr)
 }
 
+#[get("/avail-tickers", format = "application/json")]
+async fn avail_tickers() -> Json<Vec<String>> {
+    let mut db = database::connect_db().await;
+    let tickers = db.get_avail_tickers().await;
+
+    Json(tickers)
+}
+
 #[get("/<value_type>/<code>/<enddate>/<term>", format = "application/json")]
 async fn get_value(value_type: String, code: String, enddate: String, term: i32) -> Json<HashMap<String, f64>> {
     let mut db = database::connect_db().await;
@@ -32,7 +40,7 @@ async fn get_value(value_type: String, code: String, enddate: String, term: i32)
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
     let _rocket = rocket::build()
-        .mount("/", routes![index, corr])
+        .mount("/", routes![index, corr, avail_tickers])
         .mount("/value", routes![get_value])
         .launch()
         .await?;

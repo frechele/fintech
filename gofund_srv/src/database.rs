@@ -1,7 +1,7 @@
 use tokio_postgres::{Client, NoTls};
 
-use std::collections::HashMap;
 use serde::ser::{Serialize, SerializeStruct, Serializer};
+use std::collections::HashMap;
 
 use crate::config::{load_configuration, Config};
 
@@ -79,7 +79,29 @@ impl Database {
         result
     }
 
-    pub async fn get_value(&mut self, value_type: &str, code: &str, end_date: &str, limit: i32) -> HashMap<String, f64> {
+    pub async fn get_avail_tickers(&mut self) -> Vec<String> {
+        let mut result: Vec<String> = Vec::new();
+
+        for row in self
+            .client
+            .query("SELECT DISTINCT code FROM correlation", &[])
+            .await
+            .unwrap()
+        {
+            let code: &str = row.get(0);
+            result.push(code.to_string());
+        }
+
+        result
+    }
+
+    pub async fn get_value(
+        &mut self,
+        value_type: &str,
+        code: &str,
+        end_date: &str,
+        limit: i32,
+    ) -> HashMap<String, f64> {
         let mut result: HashMap<String, f64> = HashMap::new();
 
         let query = format!(
