@@ -27,9 +27,7 @@ def merge_all_tables(db: OHLCDatabase, latest_time: datetime.date, traiding_days
     return df
 
 
-def calc_correlation() -> pd.DataFrame:
-    db = OHLCDatabase(load_configuration())
-
+def calc_correlation(db: OHLCDatabase) -> pd.DataFrame:
     latest_time = get_min_latest_date(db)
 
     df_short = merge_all_tables(db, latest_time, 5)
